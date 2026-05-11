@@ -52,7 +52,14 @@ def calculate_features(file_path):
         return (loading_stiffness, hysteresis_area), "Success"
 
     except Exception as e:
-        return None, f"Error reading file: {str(e)}"
+        error_msg = str(e)
+        if 'xlrd' in error_msg.lower() or '.xls' in error_msg.lower():
+            return None, (
+                "This tool does not support the old .xls format.\n\n"
+                "Please open your file in Excel and save it as "
+                "\".xlsx\" (Excel Workbook), then try again."
+            )
+        return None, f"Error reading file: {error_msg}"
 
 
 # --- 图形界面 (GUI) 逻辑 ---
@@ -110,9 +117,18 @@ class DelamJudgeApp(ctk.CTk):
             messagebox.showerror("Input Error", "Please enter valid numeric values for thresholds.")
             return
 
-        # 2. 弹出文件选择框
-        file_path = filedialog.askopenfilename(filetypes=[("Excel Files", "*.xls *.xlsx")])
+        # 2. 弹出文件选择框，仅支持 .xlsx
+        file_path = filedialog.askopenfilename(filetypes=[("Excel Files", "*.xlsx")])
         if not file_path:
+            return
+
+        # 检查是否为旧版 .xls 格式
+        if file_path.lower().endswith('.xls') and not file_path.lower().endswith('.xlsx'):
+            messagebox.showerror(
+                "Unsupported Format",
+                "This tool does not support the old .xls format.\n\n"
+                "Please open your file in Excel and save it as \".xlsx\" (Excel Workbook), then try again."
+            )
             return
 
         # UI 更新为计算中
