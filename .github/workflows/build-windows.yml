@@ -29,12 +29,17 @@ jobs:
           pip install pyinstaller
           pip install -r requirements.txt
 
+      - name: Generate timestamp
+        run: |
+          $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+          echo "TIMESTAMP=$timestamp" >> $env:GITHUB_ENV
+
       - name: Build executable with PyInstaller
         run: |
           pyinstaller `
             --onefile `
             --windowed `
-            --name "LogoDelamJudge" `
+            --name "LogoDelamJudge-${{ env.TIMESTAMP }}" `
             --icon=NONE `
             --clean `
             --noconfirm `
@@ -48,5 +53,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v6
         with:
-          name: LogoDelamJudge-Windows
-          path: dist/LogoDelamJudge.exe
+          name: LogoDelamJudge-Windows-${{ env.TIMESTAMP }}
+          path: dist/LogoDelamJudge-${{ env.TIMESTAMP }}.exe
